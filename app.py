@@ -97,6 +97,7 @@ elif selected_payment["Status"] == "Pending":
 else:
     st.success("No failure indicated in the payment record")
 
+
 st.subheader("AI-Powered Investigation")
 
 if st.button("Analyse Selected Payment"):
@@ -105,13 +106,52 @@ if st.button("Analyse Selected Payment"):
     if status == "Completed":
         st.success("Payment record shows Completed.")
         st.info(
-            "No failure is indicated by this record. "
-            "Settlement and reconciliation are not confirmed."
+            "Settlement and reconciliation are not confirmed "
+            "by this status alone."
         )
 
-    elif status in ["Failed", "Pending"]:
-        st.info(
-            "The dashboard is running in cloud mode. "
-            "AI analysis requires a hosted AI service. "
-            "The local Ollama connection is not available here."
-        )
+    else:
+        api_key = st.secrets.get("GEMINI_API_KEY")
+
+        if not api_key:
+            st.error("Gemini API key is not configured.")
+        else:
+            prompt = f"""
+            You are a banking payments operations analyst.
+            Analyse this synthetic payment record:
+            Payment ID: {selected_payment['Payment ID']}
+            Rail: {selected_payment['Rail']}
+            Amount: {selected_payment['Amount']}
+            Status: {status}
+            Reason: {selected_payment['Reason']}
+
+            Explain:
+            1. What the current status means.
+            2. The likely issue, if any.
+            3. Recommended investigation steps.
+            Do not assume facts not provided. Distinguish
+            confirmed facts from possible causes.
+            """
+
+            try:
+                response = requests.post(
+                    "https://generativelanguage.googleapis.com/"
+                    "v1beta/models/gemini-3.8-flash:generateContent",
+                    headers={
+                        "x-goog-api-key": api_key,
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "contents": [
+                            {"parts": [{"text": prompt}]}
+                        ]
+                    },
+                    timeout=30,
+                )
+                response.raise_for_status()
+                result = response.json()
+                analysis = result["candidates"][0]["content"]["parts"][0]["text"]
+                st.markdown(analysis)
+
+            except Exception as e:
+                st.error(f"AI analysis failed: {e}")
