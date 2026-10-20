@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+from google import genai
 
 st.set_page_config(page_title="AI Banking Copilot", page_icon="🏦")
 
@@ -138,43 +139,19 @@ if st.button("Analyse Selected Payment"):
 
             
             
+            
             try:
-                import time
+                client = genai.Client(api_key=api_key)
 
-                for attempt in range(3):
-                    response = requests.post(
-                        "https://generativelanguage.googleapis.com/"
-                        "v1beta/models/gemini-3.8-flash:generateContent",
-                        headers={
-                            "x-goog-api-key": api_key,
-                            "Content-Type": "application/json",
-                        },
-                        
-                        json={
-                            "contents": [
-                                {"parts": [{"text": prompt}]}
-                            ],
-                            "generationConfig": {
-                                "maxOutputTokens": 250
-                            }
-                        },
+                response = client.models.generate_content(
+                    model="gemini-3.8-flash",
+                    contents=prompt,
+                    config={
+                        "max_output_tokens": 250
+                    },
+                )
 
-                        timeout=(10, 90),
-                    )
-
-                    if response.status_code != 503 or attempt == 2:
-                        break
-
-                    time.sleep(2 ** (attempt + 1))
-
-                if response.status_code != 200:
-                    st.error(f"Gemini API status: {response.status_code}")
-                    st.code(response.text)
-                    st.stop()
-                response.raise_for_status()
-                result = response.json()
-                analysis = result["candidates"][0]["content"]["parts"][0]["text"]
-                st.markdown(analysis)
+                st.markdown(response.text)
 
             except Exception as e:
                 st.error(f"AI analysis failed: {e}")
