@@ -149,11 +149,16 @@ if st.button("Analyse Selected Payment"):
                             "x-goog-api-key": api_key,
                             "Content-Type": "application/json",
                         },
+                        
                         json={
                             "contents": [
                                 {"parts": [{"text": prompt}]}
-                            ]
+                            ],
+                            "generationConfig": {
+                                "maxOutputTokens": 250
+                            }
                         },
+
                         timeout=(10, 90),
                     )
 
