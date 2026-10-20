@@ -158,6 +158,10 @@ if st.button("Analyse Selected Payment"):
 
                     time.sleep(2 ** (attempt + 1))
 
+                if response.status_code != 200:
+                    st.error(f"Gemini API status: {response.status_code}")
+                    st.code(response.text)
+                    st.stop()
                 response.raise_for_status()
                 result = response.json()
                 analysis = result["candidates"][0]["content"]["parts"][0]["text"]
