@@ -132,21 +132,32 @@ if st.button("Analyse Selected Payment"):
             """
 
 
+            
+            
             try:
-                response = requests.post(
-                    "https://generativelanguage.googleapis.com/"
-                    "v1beta/models/gemini-3.8-flash:generateContent",
-                    headers={
-                        "x-goog-api-key": api_key,
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "contents": [
-                            {"parts": [{"text": prompt}]}
-                        ]
-                    },
-                    timeout=30,
-                )
+                import time
+
+                for attempt in range(3):
+                    response = requests.post(
+                        "https://generativelanguage.googleapis.com/"
+                        "v1beta/models/gemini-3.8-flash:generateContent",
+                        headers={
+                            "x-goog-api-key": api_key,
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "contents": [
+                                {"parts": [{"text": prompt}]}
+                            ]
+                        },
+                        timeout=30,
+                    )
+
+                    if response.status_code != 503 or attempt == 2:
+                        break
+
+                    time.sleep(2 ** (attempt + 1))
+
                 response.raise_for_status()
                 result = response.json()
                 analysis = result["candidates"][0]["content"]["parts"][0]["text"]
