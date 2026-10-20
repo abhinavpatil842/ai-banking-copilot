@@ -117,19 +117,23 @@ if st.button("Analyse Selected Payment"):
             st.error("Gemini API key is not configured.")
         else:
             
+            
             payment_details = selected_payment.to_dict()
             prompt = f"""
-            You are a banking payments operations analyst.
-            Analyse this synthetic payment record:
-            {payment_details}
+            You are a bank payments operations analyst.
+            Analyse this payment record: {payment_details}
 
-            Explain:
-            1. What the current status means.
-            2. The likely issue, if any.
-            3. Recommended investigation steps.
-            Do not assume facts not provided. Distinguish
-            confirmed facts from possible causes.
+            Respond in no more than 120 words using these headings:
+            1. Status: Explain what the status means.
+            2. Likely cause: State the recorded reason and one
+               plausible explanation. Clearly label uncertainty.
+            3. Next action: Give up to 3 practical investigation steps.
+
+            Be concise and operational. Do not invent facts,
+            message codes, settlement outcomes, or reversal status.
+            Do not recommend retrying until the failure is verified.
             """
+
 
 
             
