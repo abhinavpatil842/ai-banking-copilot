@@ -150,7 +150,7 @@ if st.button("Analyse Selected Payment"):
                                 {"parts": [{"text": prompt}]}
                             ]
                         },
-                        timeout=30,
+                        timeout=(10, 90),
                     )
 
                     if response.status_code != 503 or attempt == 2:
