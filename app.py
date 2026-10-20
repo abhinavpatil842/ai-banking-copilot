@@ -109,51 +109,9 @@ if st.button("Analyse Selected Payment"):
             "Settlement and reconciliation are not confirmed."
         )
 
-    else:
-        prompt = f"""
-You are a banking payments operations assistant.
-
-Payment details:
-ID: {selected_payment['Payment ID']}
-Rail: {selected_payment['Rail']}
-Amount: PHP {selected_payment['Amount (PHP)']}
-Status: {status}
-Reason: {selected_payment['Reason']}
-
-If Status is Failed:
-- State that the payment has FAILED.
-- Explain the recorded reason.
-- Recommend relevant investigation steps.
-- Do not recommend retry or reversal without sufficient evidence.
-
-If Status is Pending:
-- State that the payment is PENDING.
-- Recommend checking the latest processing status and applicable SLA.
-- Do not recommend retry or reversal without sufficient evidence.
-
-Use only the supplied information.
-Do not invent bank policies or payment-network rules.
-Keep the response under 120 words.
-"""
-
-        with st.spinner("AI is analysing the payment..."):
-            try:
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": "llama3.2:3b",
-                        "prompt": prompt,
-                        "stream": False
-                    },
-                    timeout=180
-                )
-                response.raise_for_status()
-                result = response.json()["response"]
-
-                st.write("Payment ID:", selected_payment["Payment ID"])
-                st.write("Payment Rail:", selected_payment["Rail"])
-                st.write("Transaction Status:", status)
-                st.markdown(result)
-
-            except requests.RequestException as error:
-                st.error(f"Could not connect to Ollama: {error}")
+    elif status in ["Failed", "Pending"]:
+        st.info(
+            "The dashboard is running in cloud mode. "
+            "AI analysis requires a hosted AI service. "
+            "The local Ollama connection is not available here."
+        )
