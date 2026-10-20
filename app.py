@@ -116,14 +116,12 @@ if st.button("Analyse Selected Payment"):
         if not api_key:
             st.error("Gemini API key is not configured.")
         else:
+            
+            payment_details = selected_payment.to_dict()
             prompt = f"""
             You are a banking payments operations analyst.
             Analyse this synthetic payment record:
-            Payment ID: {selected_payment['Payment ID']}
-            Rail: {selected_payment['Rail']}
-            Amount: {selected_payment['Amount']}
-            Status: {status}
-            Reason: {selected_payment['Reason']}
+            {payment_details}
 
             Explain:
             1. What the current status means.
@@ -132,6 +130,7 @@ if st.button("Analyse Selected Payment"):
             Do not assume facts not provided. Distinguish
             confirmed facts from possible causes.
             """
+
 
             try:
                 response = requests.post(
