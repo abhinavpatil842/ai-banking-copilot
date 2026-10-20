@@ -154,4 +154,10 @@ if st.button("Analyse Selected Payment"):
                 st.markdown(response.text)
 
             except Exception as e:
-                st.error(f"AI analysis failed: {e}")
+                if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                    st.warning(
+                        "Daily AI usage limit reached. "
+                        "Please try again after the quota resets."
+                    )
+                else:
+                    st.error(f"AI analysis failed: {e}")
